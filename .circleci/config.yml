@@ -12,6 +12,11 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
+          name: Install Java (OpenJDK)
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y openjdk-11-jdk
+      - run:
           name: Install Dependencies
           command: |
             pip install -r requirements.txt
