@@ -12,15 +12,8 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Install Python 3.8
-          command: |
-            apt-get update && apt-get install -y python3.8 python3-pip
-      - run:
-          name: Install SonarScanner
-          command: |
-            curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
-            unzip /tmp/sonar-scanner.zip -d /home/circleci
-            export PATH=$PATH:/home/circleci/sonar-scanner-4.6.2.2472-linux/bin
+          name: Check Python version
+          command: python3 --version  # Verifica si Python 3 está correctamente instalado
       - run:
           name: Install Dependencies
           command: |
@@ -35,6 +28,12 @@ jobs:
           command: |
             pip install pytest pytest-cov
             pytest --cov=. tests/
+      - run:
+          name: Install SonarScanner
+          command: |
+            curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+            unzip /tmp/sonar-scanner.zip -d /home/circleci
+            export PATH=$PATH:/home/circleci/sonar-scanner-4.6.2.2472-linux/bin
       - run:
           name: SonarCloud Scan
           command: |
