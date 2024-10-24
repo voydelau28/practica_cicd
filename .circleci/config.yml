@@ -1,39 +1,45 @@
 version: 2.1
 
 executors:
-  python-sonar-executor:
+  python-java-executor:
     docker:
-      - image: sonarsource/sonar-scanner-cli:latest  # Imagen con SonarScanner preinstalado
+      - image: cimg/python:3.8.14  # Imagen oficial de CircleCI con Python 3.8 preinstalado y soporte para Java
 
 jobs:
   build:
-    executor: python-sonar-executor
+    executor: python-java-executor
     steps:
       - checkout
       - setup_remote_docker
       - run:
-          name: Install Python 3.8
+          name: Install Java 17
           command: |
-            sudo apt-get update
-            sudo apt-get install -y python3.8 python3-pip
+            apt-get update
+            apt-get install -y openjdk-17-jdk
+      - run:
+          name: Install SonarScanner
+          command: |
+            curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+            unzip /tmp/sonar-scanner.zip -d /home/circleci
+            export PATH=$PATH:/home/circleci/sonar-scanner-4.6.2.2472-linux/bin
       - run:
           name: Install Dependencies
           command: |
-            pip3 install -r requirements.txt
+            pip install -r requirements.txt
       - run:
           name: Run Lint
           command: |
-            pip3 install flake8
+            pip install flake8
             flake8 .
       - run:
           name: Run Tests
           command: |
-            pip3 install pytest pytest-cov
+            pip install pytest pytest-cov
             pytest --cov=. tests/
       - run:
           name: SonarCloud Scan
           command: |
-            sonar-scanner \
+            /home/circleci/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner \
               -Dsonar.projectKey=voydelau28_practica_cicd \
               -Dsonar.organization=voydelau28 \
               -Dsonar.host.url=https://sonarcloud.io \
@@ -41,7 +47,7 @@ jobs:
       - run:
           name: GitGuardian Scan
           command: |
-            pip3 install gitguardian
+            pip install gitguardian
             ggshield scan repo .
 
 workflows:
