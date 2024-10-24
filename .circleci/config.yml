@@ -3,7 +3,7 @@ version: 2.1
 executors:
   python-java-executor:
     docker:
-      - image: cimg/python:3.8.14-jdk17  # Imagen con Python 3.8 y Java 17
+      - image: circleci/openjdk:17-jdk-buster  # Imagen oficial de CircleCI con Java 17
 
 jobs:
   build:
@@ -11,6 +11,11 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
+      - run:
+          name: Install Python 3.8 and Pip
+          command: |
+            sudo apt-get update && sudo apt-get install -y python3.8 python3.8-distutils
+            curl https://bootstrap.pypa.io/get-pip.py | sudo python3.8
       - run:
           name: Install Dependencies
           command: |
