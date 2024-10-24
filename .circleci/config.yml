@@ -17,28 +17,25 @@ jobs:
       - run:
           name: Install Dependencies
           command: |
-            python -m venv venv
-            . venv/bin/activate
             pip install -r requirements.txt
       - run:
           name: Run Lint
           command: |
-            . venv/bin/activate
-            flake8 .
+            pip install flake8
+            flake8 src/
       - run:
           name: Run Tests
           command: |
-            . venv/bin/activate
-            pytest tests/
+            pip install pytest pytest-cov
+            pytest --cov=src/ tests/
       - run:
           name: SonarCloud Scan
           command: |
-            . venv/bin/activate
             sonar-scanner
       - run:
           name: GitGuardian Scan
           command: |
-            . venv/bin/activate
+            pip install gitguardian
             ggshield scan repo .
 
 workflows:
@@ -46,5 +43,3 @@ workflows:
   build-and-test:
     jobs:
       - build
-
-
