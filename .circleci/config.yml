@@ -12,21 +12,25 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
+          name: Upgrade pip
+          command: python -m pip install --upgrade pip
+      - run:
           name: Install dependencies
-          command: |
-            pip install -r requirements.txt
+          command: pip install -r requirements.txt
       - run:
           name: Build Docker image
           command: docker build -t fastapi-backend:latest .
-  
+
   test:
     executor: python-executor
     steps:
       - checkout
       - run:
+          name: Upgrade pip
+          command: python -m pip install --upgrade pip
+      - run:
           name: Install dependencies
-          command: |
-            pip install -r requirements.txt
+          command: pip install -r requirements.txt
       - run:
           name: Run tests
           command: pytest
@@ -35,6 +39,9 @@ jobs:
     executor: python-executor
     steps:
       - checkout
+      - run:
+          name: Upgrade pip
+          command: python -m pip install --upgrade pip
       - run:
           name: Install flake8
           command: pip install flake8
@@ -49,7 +56,10 @@ jobs:
       - checkout
       - run:
           name: Install sonar-scanner
-          command: curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+          command: |
+            curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+            unzip /tmp/sonar-scanner.zip -d /opt
+            export PATH=$PATH:/opt/sonar-scanner-cli-4.6.2.2472-linux/bin
       - run:
           name: SonarCloud analysis
           command: sonar-scanner
@@ -75,3 +85,4 @@ workflows:
       - lint
       - sonarcloud
       - gitguardian
+
