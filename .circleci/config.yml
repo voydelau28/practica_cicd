@@ -1,13 +1,13 @@
 version: 2.1
 
 executors:
-  python-executor:
+  sonar-executor:
     docker:
-      - image: circleci/python:3.8-jdk  # Imagen que tiene Python 3.8 y Java (OpenJDK 17) preinstalado
+      - image: sonarsource/sonar-scanner-cli:4.6  # Imagen oficial de SonarScanner con Java preinstalado
 
 jobs:
   build:
-    executor: python-executor
+    executor: sonar-executor
     steps:
       - checkout
       - setup_remote_docker
@@ -26,14 +26,9 @@ jobs:
             pip install pytest pytest-cov
             pytest --cov=. tests/
       - run:
-          name: Install SonarScanner
-          command: |
-            curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
-            unzip /tmp/sonar-scanner.zip -d /home/circleci
-      - run:
           name: SonarCloud Scan
           command: |
-            /home/circleci/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner \
+            sonar-scanner \
               -Dsonar.projectKey=voydelau28_practica_cicd \
               -Dsonar.organization=voydelau28 \
               -Dsonar.host.url=https://sonarcloud.io \
