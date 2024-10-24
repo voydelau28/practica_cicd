@@ -3,17 +3,18 @@ version: 2.1
 executors:
   python-java-executor:
     docker:
-      - image: cimg/openjdk:17.0  # Imagen con OpenJDK 17 preinstalado
+      - image: cimg/python:3.8.14  # Imagen con Python 3.8 y pip preinstalados
 
 jobs:
   build:
     executor: python-java-executor
     steps:
       - checkout
-      - setup_remote_docker
       - run:
-          name: Check Python version
-          command: python3 --version  # Verifica si Python 3 está correctamente instalado
+          name: Check Python and pip versions
+          command: |
+            python3 --version
+            pip --version
       - run:
           name: Install Dependencies
           command: |
