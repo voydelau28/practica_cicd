@@ -1,34 +1,34 @@
 version: 2.1
 
 executors:
-  python-java-executor:
+  python-sonar-executor:
     docker:
-      - image: cimg/python:3.8.14  # Imagen oficial de CircleCI con Python 3.8 preinstalado y soporte para Java
+      - image: sonarsource/sonar-scanner-cli:latest  # Imagen con SonarScanner preinstalado
 
 jobs:
   build:
-    executor: python-java-executor
+    executor: python-sonar-executor
     steps:
       - checkout
       - setup_remote_docker
       - run:
-          name: Install Java 17
+          name: Install Python 3.8
           command: |
             sudo apt-get update
-            sudo apt-get install -y openjdk-17-jdk
+            sudo apt-get install -y python3.8 python3-pip
       - run:
           name: Install Dependencies
           command: |
-            pip install -r requirements.txt
+            pip3 install -r requirements.txt
       - run:
           name: Run Lint
           command: |
-            pip install flake8
+            pip3 install flake8
             flake8 .
       - run:
           name: Run Tests
           command: |
-            pip install pytest pytest-cov
+            pip3 install pytest pytest-cov
             pytest --cov=. tests/
       - run:
           name: SonarCloud Scan
@@ -41,7 +41,7 @@ jobs:
       - run:
           name: GitGuardian Scan
           command: |
-            pip install gitguardian
+            pip3 install gitguardian
             ggshield scan repo .
 
 workflows:
