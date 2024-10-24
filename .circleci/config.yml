@@ -22,12 +22,12 @@ jobs:
           name: Run Lint
           command: |
             pip install flake8
-            flake8 src/
+            flake8 .  # Reemplazar 'src/' con '.' para linting en la raíz del proyecto
       - run:
           name: Run Tests
           command: |
             pip install pytest pytest-cov
-            pytest --cov=src/ tests/
+            pytest --cov=. tests/  # Cambiar cobertura a '.' para cubrir la raíz o el directorio correcto
       - run:
           name: SonarCloud Scan
           command: |
