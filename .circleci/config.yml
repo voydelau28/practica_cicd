@@ -1,13 +1,13 @@
 version: 2.1
 
 executors:
-  sonar-executor:
+  python-java-executor:
     docker:
-      - image: sonarsource/sonar-scanner-cli:4.6  # Imagen oficial de SonarScanner con Java preinstalado
+      - image: cimg/python:3.8.14-jdk17  # Imagen con Python 3.8 y Java 17
 
 jobs:
   build:
-    executor: sonar-executor
+    executor: python-java-executor
     steps:
       - checkout
       - setup_remote_docker
