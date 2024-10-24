@@ -1,0 +1,77 @@
+version: 2.1
+
+executors:
+  python-executor:
+    docker:
+      - image: circleci/python:3.9
+
+jobs:
+  build:
+    executor: python-executor
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Install dependencies
+          command: |
+            pip install -r requirements.txt
+      - run:
+          name: Build Docker image
+          command: docker build -t fastapi-backend:latest .
+  
+  test:
+    executor: python-executor
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            pip install -r requirements.txt
+      - run:
+          name: Run tests
+          command: pytest
+
+  lint:
+    executor: python-executor
+    steps:
+      - checkout
+      - run:
+          name: Install flake8
+          command: pip install flake8
+      - run:
+          name: Lint the code
+          command: flake8 .
+
+  sonarcloud:
+    docker:
+      - image: circleci/python:3.9
+    steps:
+      - checkout
+      - run:
+          name: Install sonar-scanner
+          command: curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+      - run:
+          name: SonarCloud analysis
+          command: sonar-scanner
+
+  gitguardian:
+    docker:
+      - image: circleci/python:3.9
+    steps:
+      - checkout
+      - run:
+          name: Install GitGuardian
+          command: pip install gitguardian
+      - run:
+          name: Run GitGuardian scan
+          command: ggshield scan repo .
+
+workflows:
+  version: 2
+  main-workflow:
+    jobs:
+      - build
+      - test
+      - lint
+      - sonarcloud
+      - gitguardian
