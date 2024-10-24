@@ -3,7 +3,7 @@ version: 2.1
 executors:
   python-executor:
     docker:
-      - image: circleci/python:3.9
+      - image: circleci/python:3.8
 
 jobs:
   build:
@@ -15,74 +15,36 @@ jobs:
           name: Upgrade pip
           command: python -m pip install --upgrade pip
       - run:
-          name: Install dependencies
-          command: pip install -r requirements.txt
-      - run:
-          name: Build Docker image
-          command: docker build -t fastapi-backend:latest .
-
-  test:
-    executor: python-executor
-    steps:
-      - checkout
-      - run:
-          name: Upgrade pip
-          command: python -m pip install --upgrade pip
-      - run:
-          name: Install dependencies
-          command: pip install -r requirements.txt
-      - run:
-          name: Run tests
-          command: pytest
-
-  lint:
-    executor: python-executor
-    steps:
-      - checkout
-      - run:
-          name: Upgrade pip
-          command: python -m pip install --upgrade pip
-      - run:
-          name: Install flake8
-          command: pip install flake8
-      - run:
-          name: Lint the code
-          command: flake8 .
-
-  sonarcloud:
-    docker:
-      - image: circleci/python:3.9
-    steps:
-      - checkout
-      - run:
-          name: Install sonar-scanner
+          name: Install Dependencies
           command: |
-            curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
-            unzip /tmp/sonar-scanner.zip -d /opt
-            export PATH=$PATH:/opt/sonar-scanner-cli-4.6.2.2472-linux/bin
+            python -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
       - run:
-          name: SonarCloud analysis
-          command: sonar-scanner
-
-  gitguardian:
-    docker:
-      - image: circleci/python:3.9
-    steps:
-      - checkout
+          name: Run Lint
+          command: |
+            . venv/bin/activate
+            flake8 .
       - run:
-          name: Install GitGuardian
-          command: pip install gitguardian
+          name: Run Tests
+          command: |
+            . venv/bin/activate
+            pytest tests/
       - run:
-          name: Run GitGuardian scan
-          command: ggshield scan repo .
+          name: SonarCloud Scan
+          command: |
+            . venv/bin/activate
+            sonar-scanner
+      - run:
+          name: GitGuardian Scan
+          command: |
+            . venv/bin/activate
+            ggshield scan repo .
 
 workflows:
   version: 2
-  main-workflow:
+  build-and-test:
     jobs:
       - build
-      - test
-      - lint
-      - sonarcloud
-      - gitguardian
+
 

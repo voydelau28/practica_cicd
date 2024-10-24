@@ -1,3 +1,6 @@
 fastapi
 uvicorn
 pytest
+pytest-cov  # Para la cobertura de código
+flake8  # Para el linting del código
+gitguardian  # Para el análisis de vulnerabilidades
