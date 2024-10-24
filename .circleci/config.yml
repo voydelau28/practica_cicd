@@ -32,8 +32,8 @@ jobs:
           name: Install SonarScanner
           command: |
             curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
-            unzip /tmp/sonar-scanner.zip -d /opt
-            export PATH=$PATH:/opt/sonar-scanner-4.6.2.2472-linux/bin
+            unzip /tmp/sonar-scanner.zip -d /home/circleci
+            export PATH=$PATH:/home/circleci/sonar-scanner-4.6.2.2472-linux/bin
       - run:
           name: SonarCloud Scan
           command: |
@@ -53,4 +53,3 @@ workflows:
   build-and-test:
     jobs:
       - build
-
