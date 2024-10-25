@@ -1,90 +1,41 @@
-version: 2.1
+version: 2.1  # Aseguramos que la versión sea 2.1
+
+orbs:
+  sonarcloud: sonarsource/sonarcloud@1.0.3  # Uso de la orb de SonarCloud
 
 executors:
-  python-java-executor:
+  python-executor:
     docker:
-      - image: cimg/python:3.8.14  # Imagen con Python 3.8 preinstalado
-    environment:
-      PIP_CACHE_DIR: ~/.cache/pip
+      - image: circleci/python:3.8  # Usamos la imagen de Python que ya tiene Python 3.8
+        environment:
+          SONAR_TOKEN: ${SONAR_TOKEN}  # Añadimos el token para SonarCloud
 
 jobs:
   build:
-    executor: python-java-executor
+    executor: python-executor
     steps:
       - checkout
-      
-      # Restaurar caché de dependencias
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "requirements.txt" }}
-            - v1-dependencies-
-      
-      # Instalación de dependencias
       - run:
-          name: Install dependencies
+          name: Install Dependencies
           command: |
+            sudo apt-get update
+            sudo apt-get install -y python3-pip
             pip install -r requirements.txt
-      
-      # Guardar caché de dependencias
-      - save_cache:
-          paths:
-            - ~/.cache/pip
-          key: v1-dependencies-{{ checksum "requirements.txt" }}
-
-      # Lint del código
       - run:
           name: Run Lint
           command: |
             pip install flake8
-            flake8 .
-      
-      # Ejecutar tests
+            flake8 .  # Linting en la raíz del proyecto
       - run:
           name: Run Tests
           command: |
             pip install pytest pytest-cov
-            pytest --cov=. tests/
-      
-      # Subir resultados de los tests
-      - store_test_results:
-          path: test-results
-      
-      # Subir informes de cobertura de los tests
-      - store_artifacts:
-          path: test-results
-          
-      # Guardar caché del workspace
-      - persist_to_workspace:
-          root: .
-          paths:
-            - test-results
-            - .
-
-      # SonarCloud Scan
-      - run:
-          name: Install SonarScanner
-          command: |
-            curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
-            unzip /tmp/sonar-scanner.zip -d /home/circleci
-            export PATH=$PATH:/home/circleci/sonar-scanner-4.6.2.2472-linux/bin
-
-      - run:
-          name: SonarCloud Scan
-          command: |
-            /home/circleci/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner \
-              -Dsonar.projectKey=voydelau28_practica_cicd \
-              -Dsonar.organization=voydelau28 \
-              -Dsonar.host.url=https://sonarcloud.io \
-              -Dsonar.login=$SONAR_TOKEN
-
-      # Guardar caché
-      - save_cache:
-          paths:
-            - ~/.sonar/cache
-          key: v1-sonar-{{ checksum "sonar-project.properties" }}
+            pytest --cov=. tests/  # Cambiamos cobertura a '.' para cubrir el directorio correcto
+      - sonarcloud/scan:  # Uso de la orb para ejecutar el análisis de SonarCloud
+          project-key: "voydelau28_practica_cicd"  # El key de tu proyecto en SonarCloud
+          organization: "voydelau28"  # Tu organización en SonarCloud
 
 workflows:
-  version: 2
   build-and-test:
     jobs:
       - build
