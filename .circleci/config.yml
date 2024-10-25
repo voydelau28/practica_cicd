@@ -7,20 +7,22 @@ executors:
   python-executor:
     docker:
       - image: circleci/python:3.8
+    working_directory: ~/repo
+    environment:
+      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+      PATH: /usr/lib/jvm/java-17-openjdk-amd64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 jobs:
   build:
     executor: python-executor
     steps:
       - checkout
-      - setup_remote_docker
       - run:
           name: Install Java 17
           command: |
             sudo apt-get update
             sudo apt-get install -y openjdk-17-jdk
-            echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' >> $BASH_ENV
-            echo 'export PATH=$JAVA_HOME/bin:$PATH' >> $BASH_ENV
+            java -version  # Verifica que Java 17 esté instalado
       - run:
           name: Install Dependencies
           command: |
