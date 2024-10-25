@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  sonarcloud: sonarsource/sonarcloud@1.0.3  # Asegúrate de tener la versión correcta
+  sonarcloud: sonarsource/sonarcloud@1.0.3  # Asegúrate de tener la versión correcta de la orb
 
 executors:
   python-executor:
@@ -28,9 +28,10 @@ jobs:
           command: |
             pip install pytest pytest-cov
             pytest --cov=. tests/
-      - sonarcloud/scan:
-          organization: "voydelau28"  # Coloca el nombre de tu organización en SonarCloud
-          project-key: "voydelau28_practica_cicd"  # Coloca el key de tu proyecto en SonarCloud
+      - run:
+          name: SonarCloud Scanner
+          command: |
+            sonar-scanner -Dsonar.organization=voydelau28 -Dsonar.projectKey=voydelau28_practica_cicd -Dsonar.login=$SONAR_TOKEN
 
 workflows:
   build-and-test:
