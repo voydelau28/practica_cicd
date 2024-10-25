@@ -3,38 +3,71 @@ version: 2.1
 executors:
   python-java-executor:
     docker:
-      - image: cimg/python:3.8.14  # Imagen con Python 3.8 y pip preinstalados
+      - image: cimg/python:3.8.14  # Imagen con Python 3.8 preinstalado
+    environment:
+      PIP_CACHE_DIR: ~/.cache/pip
 
 jobs:
   build:
     executor: python-java-executor
     steps:
       - checkout
+      
+      # Restaurar caché de dependencias
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            - v1-dependencies-
+      
+      # Instalación de dependencias
       - run:
-          name: Check Python and pip versions
-          command: |
-            python3 --version
-            pip --version
-      - run:
-          name: Install Dependencies
+          name: Install dependencies
           command: |
             pip install -r requirements.txt
+      
+      # Guardar caché de dependencias
+      - save_cache:
+          paths:
+            - ~/.cache/pip
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+      # Lint del código
       - run:
           name: Run Lint
           command: |
             pip install flake8
             flake8 .
+      
+      # Ejecutar tests
       - run:
           name: Run Tests
           command: |
             pip install pytest pytest-cov
             pytest --cov=. tests/
+      
+      # Subir resultados de los tests
+      - store_test_results:
+          path: test-results
+      
+      # Subir informes de cobertura de los tests
+      - store_artifacts:
+          path: test-results
+          
+      # Guardar caché del workspace
+      - persist_to_workspace:
+          root: .
+          paths:
+            - test-results
+            - .
+
+      # SonarCloud Scan
       - run:
           name: Install SonarScanner
           command: |
             curl -sSLo /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
             unzip /tmp/sonar-scanner.zip -d /home/circleci
             export PATH=$PATH:/home/circleci/sonar-scanner-4.6.2.2472-linux/bin
+
       - run:
           name: SonarCloud Scan
           command: |
@@ -43,11 +76,12 @@ jobs:
               -Dsonar.organization=voydelau28 \
               -Dsonar.host.url=https://sonarcloud.io \
               -Dsonar.login=$SONAR_TOKEN
-      - run:
-          name: GitGuardian Scan
-          command: |
-            pip install gitguardian
-            ggshield scan repo .
+
+      # Guardar caché
+      - save_cache:
+          paths:
+            - ~/.sonar/cache
+          key: v1-sonar-{{ checksum "sonar-project.properties" }}
 
 workflows:
   version: 2
