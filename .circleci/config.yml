@@ -13,7 +13,7 @@ jobs:
           name: Instalar dependencias
           command: |
             pip install --upgrade pip
-            pip install -r requirements.txt
+            pip install -r requirements.txt httpx  # Instala httpx junto con las demás dependencias
       - run:
           name: Ejecutar pruebas
           command: |
@@ -26,13 +26,14 @@ jobs:
           path: test-results
       - store_artifacts:
           path: coverage.xml
-      - sonarcloud/scan  # Solo se llama al comando sin argumentos específicos
+      - sonarcloud/scan:
+          setup_remote_docker
       - run:
           name: Build Docker image
-          command: docker build -t $DOCKERHUB_USERNAME/myapp:latest .
+          command: docker build -t voydelau28/myapp:latest .
       - run:
           name: Test Docker image
-          command: docker run --rm $DOCKERHUB_USERNAME/myapp:latest pytest
+          command: docker run --rm voydelau28/myapp:latest pytest
 
 workflows:
   version: 2.1
