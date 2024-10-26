@@ -1,66 +1,54 @@
 version: 2.1
 
 orbs:
-  sonarcloud: sonarsource/sonarcloud@1.0.3
-
-executors:
-  python-executor:
-    docker:
-      - image: circleci/python:3.8
-    working_directory: ~/repo
+  sonarcloud: sonarsource/sonarcloud@2.0.0
 
 jobs:
-  build:
-    executor: python-executor
+  test:
+    docker:
+      - image: cimg/python:3.9
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
       - run:
-          name: Update pip
+          name: Instalar dependencias
           command: |
-            python -m pip install --upgrade pip
-      - run:
-          name: Install Dependencies
-          command: |
+            pip install --upgrade pip
             pip install -r requirements.txt
       - run:
-          name: Install flake8
-          command: |
-            pip install flake8
+          name: Ejecutar pruebas
+          command: pytest --cov=. --cov-report xml:coverage.xml
       - run:
-          name: Run Lint
-          command: |
-            flake8 .
-      - run:
-          name: Run Tests
-          command: |
-            pip install pytest pytest-cov
-            pytest --cov=. tests/
-      - run:
-          name: Install GitGuardian CLI
-          command: |
-            pip install ggshield
-      - run:
-          name: GitGuardian Scan
-          command: |
-            ggshield secret scan path .
-      - run:
-          name: Build Docker Image
-          command: |
-            docker build -t voydeuser/myapp:latest .
-      - run:
-          name: Push Docker Image
-          command: |
-            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-            docker push voydeuser/myapp:latest
+          name: Ejecutar linting
+          command: flake8 .
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: coverage.xml
       - sonarcloud/scan:
           organization: "voydelau28"
           projectKey: "voydelau28_practica_cicd"
-          
+          token: $SONAR_TOKEN
+
+  publish_docker_image:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          name: Build Docker image
+          command: docker build -t voydeuser/mi-app:latest .
+      - run:
+          name: Login to Docker Hub
+          command: |
+            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+      - run:
+          name: Push Docker image to Docker Hub
+          command: docker push voydeuser/mi-app:latest
 
 workflows:
-  build-and-test:
+  version: 2.1
+  workflow_test:
     jobs:
-      - build
-
+      - test
+      - publish_docker_image
