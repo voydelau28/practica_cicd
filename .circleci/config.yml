@@ -13,7 +13,7 @@ jobs:
           name: Instalar dependencias
           command: |
             pip install --upgrade pip
-            pip install -r requirements.txt httpx  # Instala httpx junto con las demás dependencias
+            pip install -r requirements.txt httpx
       - run:
           name: Ejecutar pruebas
           command: |
@@ -27,7 +27,9 @@ jobs:
       - store_artifacts:
           path: coverage.xml
       - sonarcloud/scan:
-          setup_remote_docker
+          parameters:
+            organization: "your_organization"  # Reemplaza con el nombre de tu organización en SonarCloud
+            projectKey: "your_project_key"    # Reemplaza con el key de tu proyecto en SonarCloud
       - run:
           name: Build Docker image
           command: docker build -t voydelau28/myapp:latest .
@@ -36,7 +38,6 @@ jobs:
           command: docker run --rm voydelau28/myapp:latest pytest
 
 workflows:
-  version: 2.1
   workflow_build:
     jobs:
       - build
