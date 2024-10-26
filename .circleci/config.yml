@@ -9,6 +9,9 @@ jobs:
       - image: cimg/python:3.9
     steps:
       - checkout
+      - setup_remote_docker:  # Habilita el acceso a Docker
+          version: 20.10.7  
+    
       - run:
           name: Instalar dependencias
           command: |
