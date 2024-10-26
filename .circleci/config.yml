@@ -26,10 +26,7 @@ jobs:
           path: test-results
       - store_artifacts:
           path: coverage.xml
-      - sonarcloud/scan:
-          organization: "${SONAR_ORGANIZATION}"
-          projectKey: "${SONAR_PROJECT_KEY}"
-          token: "${SONAR_TOKEN}"
+      - sonarcloud/scan  # Solo se llama al comando sin argumentos específicos
       - run:
           name: Build Docker image
           command: docker build -t $DOCKERHUB_USERNAME/myapp:latest .
