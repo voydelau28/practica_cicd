@@ -11,7 +11,8 @@ jobs:
     executor: python-executor
     steps:
       - checkout
-      - setup_remote_docker  # Usamos la configuración predeterminada de Docker
+      - setup_remote_docker:  # Configuración de Docker
+          docker_layer_caching: true
       - run:
           name: Update pip
           command: |
@@ -41,8 +42,6 @@ jobs:
           name: GitGuardian Scan
           command: |
             ggshield scan path .
-      - setup_remote_docker:
-          docker_layer_caching: true
       - run:
           name: Build Docker Image
           command: |
