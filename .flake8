@@ -6,4 +6,6 @@ exclude =
     old,
     build,
     dist
-    E302
+ignore = E302
+
+    
