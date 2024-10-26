@@ -24,10 +24,7 @@ jobs:
           path: test-results
       - store_artifacts:
           path: coverage.xml
-      - sonarcloud/scan:
-          organization: "voydelau28"
-          projectKey: "voydelau28_practica_cicd"
-          token: $SONAR_TOKEN
+      - sonarcloud/scan  # Ejecuta el análisis de SonarCloud
 
   publish_docker_image:
     docker:
