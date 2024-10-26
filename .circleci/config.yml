@@ -4,7 +4,7 @@ orbs:
   sonarcloud: sonarsource/sonarcloud@2.0.0
 
 jobs:
-  test:
+  build:
     docker:
       - image: cimg/python:3.9
     steps:
@@ -16,17 +16,26 @@ jobs:
             pip install -r requirements.txt
       - run:
           name: Ejecutar pruebas
-          command: pytest --cov=. --cov-report xml:coverage.xml
+          command: |
+            pytest --cov=backend --cov-report xml:coverage.xml
       - run:
           name: Ejecutar linting
-          command: flake8 .
+          command: |
+            flake8 .
       - store_test_results:
           path: test-results
       - store_artifacts:
           path: coverage.xml
-      - sonarcloud/scan  # Ejecuta el análisis de SonarCloud
+      - sonarcloud/scan:
+          setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: docker build -t voydelau28/myapp:latest .
+      - run:
+          name: Test Docker image
+          command: docker run --rm voydelau28/myapp:latest pytest
 
-  publish_docker_image:
+  publish:
     docker:
       - image: cimg/python:3.9
     steps:
@@ -34,18 +43,17 @@ jobs:
       - checkout
       - run:
           name: Build Docker image
-          command: docker build -t voydeuser/mi-app:latest .
+          command: docker build -t voydeuser/myapp:latest .
       - run:
           name: Login to Docker Hub
           command: |
-            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+            echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
       - run:
           name: Push Docker image to Docker Hub
-          command: docker push voydeuser/mi-app:latest
+          command: docker push voydeuser/myapp:latest
 
 workflows:
   version: 2.1
-  workflow_test:
+  workflow_build:
     jobs:
-      - test
-      - publish_docker_image
+      - build
