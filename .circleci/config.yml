@@ -11,7 +11,7 @@ jobs:
     executor: python-executor
     steps:
       - checkout
-      - setup_remote_docker:  # Configuración de Docker
+      - setup_remote_docker:
           docker_layer_caching: true
       - run:
           name: Update pip
@@ -41,7 +41,17 @@ jobs:
       - run:
           name: GitGuardian Scan
           command: |
-            ggshield scan path .
+            ggshield secret scan path .
+      - run:
+          name: Install SonarScanner
+          command: |
+            curl -sSLo sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+            unzip sonar-scanner-cli.zip
+            echo 'export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin' >> $BASH_ENV
+      - run:
+          name: SonarCloud Scanner
+          command: |
+            sonar-scanner -Dsonar.organization=voydelau28 -Dsonar.projectKey=voydelau28_practica_cicd
       - run:
           name: Build Docker Image
           command: |
