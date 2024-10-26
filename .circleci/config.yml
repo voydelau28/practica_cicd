@@ -26,10 +26,7 @@ jobs:
           path: test-results
       - store_artifacts:
           path: coverage.xml
-      - sonarcloud/scan:
-          parameters:
-            organization: "your_organization"  # Reemplaza con el nombre de tu organización en SonarCloud
-            projectKey: "your_project_key"    # Reemplaza con el key de tu proyecto en SonarCloud
+      - sonarcloud/scan  # Llamada al orb sin especificar parámetros en el archivo de configuración
       - run:
           name: Build Docker image
           command: docker build -t voydelau28/myapp:latest .
@@ -41,3 +38,4 @@ workflows:
   workflow_build:
     jobs:
       - build
+
