@@ -30,10 +30,10 @@ jobs:
           setup_remote_docker
       - run:
           name: Build Docker image
-          command: docker build -t voydelau28/myapp:latest .
+          command: docker build -t $DOCKERHUB_USERNAME/myapp:latest .
       - run:
           name: Test Docker image
-          command: docker run --rm voydelau28/myapp:latest pytest
+          command: docker run --rm $DOCKERHUB_USERNAME/myapp:latest pytest
 
   publish:
     docker:
@@ -43,17 +43,16 @@ jobs:
       - checkout
       - run:
           name: Build Docker image
-          command: docker build -t voydeuser/myapp:latest .
+          command: docker build -t $DOCKERHUB_USERNAME/myapp:latest .
       - run:
           name: Login to Docker Hub
           command: |
             echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
       - run:
           name: Push Docker image to Docker Hub
-          command: docker push voydeuser/myapp:latest
+          command: docker push $DOCKERHUB_USERNAME/myapp:latest
 
 workflows:
-  version: 2.1
   workflow_build:
     jobs:
       - build
