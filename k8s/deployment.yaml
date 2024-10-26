@@ -14,9 +14,9 @@ spec:
     spec:
       containers:
       - name: my-app
-        image: your-docker-image:latest
+        image: voydelau28/mi-app:latest
         ports:
-        - containerPort: 80
+        - containerPort: 8000
         envFrom:
         - configMapRef:
             name: my-app-config
