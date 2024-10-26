@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  sonarcloud: sonarsource/sonarcloud@1.0.3
+
 executors:
   python-executor:
     docker:
@@ -43,16 +46,6 @@ jobs:
           command: |
             ggshield secret scan path .
       - run:
-          name: Install SonarScanner
-          command: |
-            curl -sSLo sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
-            unzip sonar-scanner-cli.zip
-            echo 'export PATH=$PATH:$(pwd)/sonar-scanner-4.6.2.2472-linux/bin' >> $BASH_ENV
-      - run:
-          name: SonarCloud Scanner
-          command: |
-            sonar-scanner -Dsonar.organization=voydelau28 -Dsonar.projectKey=voydelau28_practica_cicd
-      - run:
           name: Build Docker Image
           command: |
             docker build -t voydeuser/myapp:latest .
@@ -61,6 +54,10 @@ jobs:
           command: |
             echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
             docker push voydeuser/myapp:latest
+      - sonarcloud/scan:
+          organization: "voydelau28"
+          projectKey: "voydelau28_practica_cicd"
+          
 
 workflows:
   build-and-test:
