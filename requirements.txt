@@ -3,3 +3,4 @@ uvicorn
 pytest
 pytest-cov  # Para la cobertura de código
 flake8  # Para el linting del código
+fastapi
